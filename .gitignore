@@ -32,8 +32,43 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
 
-app-example
+# Android
+android/
+android-build/
+*.apk
+*.aab
+
+# iOS
+ios/
+ios-build/
+*.ipa
+
+# Generated native code
+.expo-shared/
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Build outputs
+build/
+out/
+
+# Expo specific

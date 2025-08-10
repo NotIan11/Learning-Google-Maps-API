@@ -48,3 +48,11 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Environment Setup
+
+1. Copy `.env.example` to `.env`
+2. Add your Google Maps API key to `.env`:
+   ```
+   GOOGLE_MAPS_API_KEY=your_actual_api_key_here
+   ```
