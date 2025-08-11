@@ -1,6 +1,9 @@
 import React from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
+{/*import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { GOOGLE_MAPS_API_KEY } from '../config/env';*/}
+
 
 
 export default function App() {
@@ -21,7 +24,7 @@ export default function App() {
           console.log(data, details);
         }}
         query={{
-          key: 'AIzaSyDG258Q2a5mxCRr940XSjOi3lQxZR-CidU',
+          key: GOOGLE_MAPS_API_KEY,
           language: 'en',
         }}
         styles={{
