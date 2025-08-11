@@ -35,6 +35,12 @@ export default {
     plugins: [
       "expo-router",
       [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission: "Allow MapFamiliarity to use your location to show you on the map."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
