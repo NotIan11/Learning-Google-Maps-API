@@ -2,7 +2,7 @@ import * as Location from 'expo-location';
 import React, { useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Circle, Marker, Polyline } from 'react-native-maps';
-import { GOOGLE_MAPS_API_KEY } from '../config/api';
+import { GOOGLE_MAPS_API_KEY } from '../config/api.js';
 
 // Types for future integration
 interface Task {
@@ -100,7 +100,7 @@ export default function App() {
       const request = {
         origin: `${userLocation.latitude},${userLocation.longitude}`,
         destination: `${taskLocation.latitude},${taskLocation.longitude}`,
-        travelMode: 'WALKING', // or 'DRIVING', 'BICYCLING', 'TRANSIT'
+        travelMode: 'DRIVING', // or 'DRIVING', 'BICYCLING', 'TRANSIT'
         unitSystem: 'METRIC',
       };
 
