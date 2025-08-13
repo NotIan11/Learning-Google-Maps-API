@@ -56,3 +56,8 @@ Join our community of developers creating universal apps.
    ```
    GOOGLE_MAPS_API_KEY=your_actual_api_key_here
    ```
+
+## Setup
+1. Copy `config/api.example.ts` to `config/api.ts`
+2. Add your Google Maps API key to `config/api.ts`
+3. Never commit `config/api.ts` to version control

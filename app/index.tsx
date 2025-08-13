@@ -1,8 +1,7 @@
 import * as Location from 'expo-location';
 import React, { useState } from 'react';
-import { Alert, Dimensions, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Circle, Marker, Polyline } from 'react-native-maps';
-import { GOOGLE_MAPS_API_KEY } from '../config/api';
+import { Alert, Dimensions, Linking, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import MapView, { Circle, Marker } from 'react-native-maps';
 
 // Types for future integration
 interface Task {
@@ -39,15 +38,6 @@ interface SafeMeetingPoint {
   type: 'library' | 'student_union' | 'cafe' | 'public_space' | 'police_station';
 }
 
-interface Route {
-  coordinates: Array<{
-    latitude: number;
-    longitude: number;
-  }>;
-  distance: number;
-  duration: number;
-}
-
 export default function App() {
   const [pin, setPin] = React.useState({
     latitude: 29.6476, // UF Reitz Union
@@ -70,9 +60,10 @@ export default function App() {
   const [hotspots, setHotspots] = React.useState<Hotspot[]>([]);
   const [safePoints, setSafePoints] = React.useState<SafeMeetingPoint[]>([]);
   const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
-  const [routeToTask, setRouteToTask] = useState<Route | null>(null);
-  const [isRouting, setIsRouting] = useState(false);
   const [acceptedTasks, setAcceptedTasks] = useState<Set<string>>(new Set());
+
+  // Restore the mapRefreshKey state
+  const [mapRefreshKey, setMapRefreshKey] = useState(0);
 
   // Mock UF campus location for testing
   const mockUFLocation = {
@@ -86,104 +77,54 @@ export default function App() {
     Alert.alert('Mock Location Set', 'Location set to UF Reitz Union for testing');
   };
 
-  // Function to calculate route from user location to task using Google Directions API
-  const calculateRoute = async (taskLocation: { latitude: number; longitude: number }) => {
+  // Add this function to open Apple Maps navigation
+  const openAppleMapsNavigation = (taskLocation: { latitude: number; longitude: number }) => {
     if (!userLocation) {
       Alert.alert('No Location', 'Please enable location services or set mock location');
       return;
     }
 
-    setIsRouting(true);
+    // Create the Apple Maps URL
+    const url = `http://maps.apple.com/?saddr=${userLocation.latitude},${userLocation.longitude}&daddr=${taskLocation.latitude},${taskLocation.longitude}&dirflg=w`;
     
-    try {
-      // Create the directions service request
-      const request = {
-        origin: `${userLocation.latitude},${userLocation.longitude}`,
-        destination: `${taskLocation.latitude},${taskLocation.longitude}`,
-        travelMode: 'WALKING', // or 'DRIVING', 'BICYCLING', 'TRANSIT'
-        unitSystem: 'METRIC',
-      };
-
-      // Make the API call to Google Directions
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?${new URLSearchParams({
-          ...request,
-          key: GOOGLE_MAPS_API_KEY // Make sure this is set
-        })}`
-      );
-
-      const data = await response.json();
-
-      if (data.status === 'OK' && data.routes.length > 0) {
-        const route = data.routes[0];
-        const leg = route.legs[0];
-        
-        // Extract the polyline points
-        const points = decodePolyline(route.overview_polyline.points);
-        
-        // Create the route object
-        const newRoute: Route = {
-          coordinates: points,
-          distance: leg.distance.value / 1000, // Convert meters to km
-          duration: Math.ceil(leg.duration.value / 60), // Convert seconds to minutes
-        };
-        
-        setRouteToTask(newRoute);
-      } else {
-        throw new Error(`Directions API error: ${data.status}`);
-      }
-      
-      setIsRouting(false);
-      
-    } catch (error) {
-      console.error('Error calculating route:', error);
-      Alert.alert('Error', 'Could not calculate route. Please try again.');
-      setIsRouting(false);
-    }
+    // Open Apple Maps
+    Linking.openURL(url);
   };
 
-  // Helper function to decode Google's polyline format
-  const decodePolyline = (encoded: string) => {
-    const poly = [];
-    let index = 0, len = encoded.length;
-    let lat = 0, lng = 0;
-
-    while (index < len) {
-      let shift = 0, result = 0;
-
-      do {
-        let b = encoded.charCodeAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (result >= 0x20);
-
-      let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-
-      do {
-        let b = encoded.charCodeAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (result >= 0x20);
-
-      let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
-
-      poly.push({
-        latitude: lat / 1E5,
-        longitude: lng / 1E5
-      });
+  // Function to accept a task
+  const acceptTask = (task: Task) => {
+    console.log('🎯 acceptTask called with task:', task);
+    
+    if (acceptedTasks.size > 0) {
+      Alert.alert('Task Already Accepted', 'You can only accept one task at a time. Please complete or cancel your current task first.');
+      return;
     }
-
-    return poly;
+    
+    setAcceptedTasks(prev => new Set(prev).add(task.id));
+    
+    // Open Apple Maps navigation instead of calculating route
+    openAppleMapsNavigation(task.location);
+    
+    setSelectedTask(null);
   };
 
-  // Function to clear route
-  const clearRoute = () => {
-    setRouteToTask(null);
+  // Function to cancel an accepted task
+  const cancelTask = (task: Task) => {
+    setAcceptedTasks(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(task.id);
+      return newSet;
+    });
+    setSelectedTask(null);
+  };
+
+  // Update your overlay toggle functions
+  const toggleOverlay = (setter: React.Dispatch<React.SetStateAction<boolean>>, value: boolean) => {
+    setter(value);
+    // Force map refresh after a small delay
+    setTimeout(() => {
+      setMapRefreshKey(prev => prev + 1);
+    }, 50);
   };
 
   // Function to fetch tasks (placeholder for future API integration)
@@ -199,7 +140,7 @@ export default function App() {
         id: '1',
         title: 'Help move furniture',
         description: 'Need help moving a desk from my dorm',
-        location: { latitude: 29.6480, longitude: -82.3475 },
+        location: { latitude: 29.6490, longitude: -82.3485 }, // Move this one further away
         payment: 25,
         status: 'open',
         category: 'moving'
@@ -208,7 +149,7 @@ export default function App() {
         id: '2',
         title: 'Study partner needed',
         description: 'Looking for someone to study calculus with',
-        location: { latitude: 29.6470, longitude: -82.3465 },
+        location: { latitude: 29.6470, longitude: -82.3465 }, // Keep this one
         payment: 15,
         status: 'open',
         category: 'academic'
@@ -217,7 +158,7 @@ export default function App() {
         id: '3',
         title: 'Test',
         description: 'test',
-        location: { latitude: 29.6476, longitude: -82.3472 },
+        location: { latitude: 29.6478, longitude: -82.3474 }, // Keep this one
         payment: 10000,
         status: 'open',
         category: 'academic'
@@ -395,30 +336,6 @@ export default function App() {
     getCurrentLocation();
   }, []);
 
-  // Function to accept a task
-  const acceptTask = (task: Task) => {
-    // Check if user already has an accepted task
-    if (acceptedTasks.size > 0) {
-      Alert.alert('Task Already Accepted', 'You can only accept one task at a time. Please complete or cancel your current task first.');
-      return;
-    }
-    
-    setAcceptedTasks(prev => new Set(prev).add(task.id));
-    calculateRoute(task.location);
-    setSelectedTask(null);
-  };
-
-  // Function to cancel an accepted task
-  const cancelTask = (task: Task) => {
-    setAcceptedTasks(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(task.id);
-      return newSet;
-    });
-    clearRoute();
-    setSelectedTask(null);
-  };
-
   return (
     <View style={{marginTop: 0, flex: 1}}>
       {/* Mock Location Button for Testing */}
@@ -447,7 +364,7 @@ export default function App() {
               <Text style={styles.featureText}>Hotspots</Text>
               <Switch 
                 value={showHotspots} 
-                onValueChange={setShowHotspots}
+                onValueChange={(value) => toggleOverlay(setShowHotspots, value)}
                 trackColor={{ false: '#e0e0e0', true: '#0021A5' }}
                 thumbColor={showHotspots ? '#fff' : '#f4f3f4'}
               />
@@ -457,7 +374,7 @@ export default function App() {
               <Text style={styles.featureText}>Tasks</Text>
               <Switch 
                 value={showTasks} 
-                onValueChange={setShowTasks}
+                onValueChange={(value) => toggleOverlay(setShowTasks, value)}
                 trackColor={{ false: '#e0e0e0', true: '#0021A5' }}
                 thumbColor={showTasks ? '#fff' : '#f4f3f4'}
               />
@@ -467,7 +384,7 @@ export default function App() {
               <Text style={styles.featureText}>Safe Spots</Text>
               <Switch 
                 value={showSafePoints} 
-                onValueChange={setShowSafePoints}
+                onValueChange={(value) => toggleOverlay(setShowSafePoints, value)}
                 trackColor={{ false: '#e0e0e0', true: '#0021A5' }}
                 thumbColor={showSafePoints ? '#fff' : '#f4f3f4'}
               />
@@ -477,6 +394,7 @@ export default function App() {
       </View>
 
       <MapView 
+        key={mapRefreshKey}
         style={styles.map}
         region={{
           latitude: pin.latitude,
@@ -556,14 +474,7 @@ export default function App() {
         />
 
         {/* Route line */}
-        {routeToTask && (
-          <Polyline
-            coordinates={routeToTask.coordinates}
-            strokeColor="#007AFF"
-            strokeWidth={4}
-            lineDashPattern={[10, 5]}
-          />
-        )}
+        {/* The polyline approach is removed, so this section is now empty */}
       </MapView>
 
       {/* Task Details Modal */}
@@ -653,7 +564,10 @@ export default function App() {
                     styles.fullWidthButton,
                     acceptedTasks.size > 0 && styles.disabledButton
                   ]}
-                  onPress={() => acceptTask(selectedTask)}
+                  onPress={() => {
+                    console.log('🔘 Accept button pressed!');
+                    acceptTask(selectedTask);
+                  }}
                   disabled={acceptedTasks.size > 0}
                 >
                   <Text style={styles.acceptIcon}>✓</Text>
