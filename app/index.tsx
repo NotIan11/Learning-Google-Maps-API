@@ -129,18 +129,14 @@ export default function App() {
 
   // Function to fetch tasks (placeholder for future API integration)
   const fetchTasks = async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/tasks');
-    // const data = await response.json();
-    // setTasks(data);
-    
     // Mock data for now
     const mockTasks: Task[] = [
+      // Football Stadium Cluster (8 tasks)
       {
         id: '1',
         title: 'Help move furniture',
         description: 'Need help moving a desk from my dorm',
-        location: { latitude: 29.6490, longitude: -82.3485 }, // Move this one further away
+        location: { latitude: 29.6490, longitude: -82.3485 },
         payment: 25,
         status: 'open',
         category: 'moving'
@@ -149,7 +145,7 @@ export default function App() {
         id: '2',
         title: 'Study partner needed',
         description: 'Looking for someone to study calculus with',
-        location: { latitude: 29.6470, longitude: -82.3465 }, // Keep this one
+        location: { latitude: 29.6470, longitude: -82.3465 },
         payment: 15,
         status: 'open',
         category: 'academic'
@@ -158,79 +154,548 @@ export default function App() {
         id: '3',
         title: 'Test',
         description: 'test',
-        location: { latitude: 29.6478, longitude: -82.3474 }, // Keep this one
+        location: { latitude: 29.6478, longitude: -82.3474 },
         payment: 10000,
         status: 'open',
         category: 'academic'
+      },
+      {
+        id: '4',
+        title: 'Football game setup help',
+        description: 'Need help setting up tailgate area',
+        location: { latitude: 29.6495, longitude: -82.3480 },
+        payment: 30,
+        status: 'open',
+        category: 'event'
+      },
+      {
+        id: '5',
+        title: 'Parking spot needed',
+        description: 'Looking for parking near stadium',
+        location: { latitude: 29.6488, longitude: -82.3478 },
+        payment: 20,
+        status: 'open',
+        category: 'parking'
+      },
+      {
+        id: '6',
+        title: 'Food delivery to stadium',
+        description: 'Bring pizza to section 15',
+        location: { latitude: 29.6492, longitude: -82.3482 },
+        payment: 18,
+        status: 'open',
+        category: 'delivery'
+      },
+      {
+        id: '7',
+        title: 'Lost phone near stadium',
+        description: 'Help find my phone in parking lot',
+        location: { latitude: 29.6485, longitude: -82.3475 },
+        payment: 50,
+        status: 'open',
+        category: 'lost'
+      },
+      {
+        id: '8',
+        title: 'Stadium tour guide',
+        description: 'Show me around the football stadium',
+        location: { latitude: 29.6498, longitude: -82.3488 },
+        payment: 25,
+        status: 'open',
+        category: 'tour'
+      },
+
+      // Honors Village Cluster (6 tasks)
+      {
+        id: '9',
+        title: 'Honors study group',
+        description: 'Forming study group for honors students',
+        location: { latitude: 29.6520, longitude: -82.3450 },
+        payment: 0,
+        status: 'open',
+        category: 'academic'
+      },
+      {
+        id: '10',
+        title: 'Honors dorm cleaning',
+        description: 'Help clean common areas',
+        location: { latitude: 29.6525, longitude: -82.3448 },
+        payment: 35,
+        status: 'open',
+        category: 'cleaning'
+      },
+      {
+        id: '11',
+        title: 'Honors event planning',
+        description: 'Help plan honors week activities',
+        location: { latitude: 29.6518, longitude: -82.3452 },
+        payment: 40,
+        status: 'open',
+        category: 'planning'
+      },
+      {
+        id: '12',
+        title: 'Honors tutoring',
+        description: 'Need help with honors physics',
+        location: { latitude: 29.6522, longitude: -82.3445 },
+        payment: 45,
+        status: 'open',
+        category: 'tutoring'
+      },
+      {
+        id: '13',
+        title: 'Honors roommate finder',
+        description: 'Looking for honors roommate',
+        location: { latitude: 29.6528, longitude: -82.3455 },
+        payment: 0,
+        status: 'open',
+        category: 'housing'
+      },
+      {
+        id: '14',
+        title: 'Honors library run',
+        description: 'Pick up books from library for me',
+        location: { latitude: 29.6515, longitude: -82.3442 },
+        payment: 15,
+        status: 'open',
+        category: 'errand'
+      },
+
+      // Marston Library Cluster (4 tasks)
+      {
+        id: '15',
+        title: 'Library study buddy',
+        description: 'Study together at Marston',
+        location: { latitude: 29.6488, longitude: -82.3462 },
+        payment: 20,
+        status: 'open',
+        category: 'academic'
+      },
+      {
+        id: '16',
+        title: 'Library book return',
+        description: 'Return books to Marston library',
+        location: { latitude: 29.6485, longitude: -82.3465 },
+        payment: 12,
+        status: 'open',
+        category: 'errand'
+      },
+      {
+        id: '17',
+        title: 'Library printing help',
+        description: 'Help with printing at Marston',
+        location: { latitude: 29.6490, longitude: -82.3460 },
+        payment: 8,
+        status: 'open',
+        category: 'help'
+      },
+      {
+        id: '18',
+        title: 'Library quiet zone',
+        description: 'Need help finding quiet study area',
+        location: { latitude: 29.6482, longitude: -82.3468 },
+        payment: 10,
+        status: 'open',
+        category: 'help'
+      },
+
+      // Reitz Union Cluster (3 tasks)
+      {
+        id: '19',
+        title: 'Union food court help',
+        description: 'Help carry food to table',
+        location: { latitude: 29.6478, longitude: -82.3472 },
+        payment: 5,
+        status: 'open',
+        category: 'help'
+      },
+      {
+        id: '20',
+        title: 'Union event setup',
+        description: 'Help set up for career fair',
+        location: { latitude: 29.6475, longitude: -82.3475 },
+        payment: 25,
+        status: 'open',
+        category: 'event'
+      },
+      {
+        id: '21',
+        title: 'Union lost and found',
+        description: 'Help find my keys in union',
+        location: { latitude: 29.6480, longitude: -82.3470 },
+        payment: 30,
+        status: 'open',
+        category: 'lost'
+      },
+
+      // NEW: Turlington Plaza Cluster (5 tasks)
+      {
+        id: '22',
+        title: 'Turlington flyer distribution',
+        description: 'Help pass out event flyers',
+        location: { latitude: 29.6505, longitude: -82.3435 },
+        payment: 20,
+        status: 'open',
+        category: 'marketing'
+      },
+      {
+        id: '23',
+        title: 'Turlington protest support',
+        description: 'Need help with peaceful demonstration',
+        location: { latitude: 29.6508, longitude: -82.3438 },
+        payment: 0,
+        status: 'open',
+        category: 'activism'
+      },
+      {
+        id: '24',
+        title: 'Turlington cleanup',
+        description: 'Help clean up after event',
+        location: { latitude: 29.6502, longitude: -82.3432 },
+        payment: 15,
+        status: 'open',
+        category: 'cleaning'
+      },
+      {
+        id: '25',
+        title: 'Turlington photography',
+        description: 'Take photos of campus event',
+        location: { latitude: 29.6506, longitude: -82.3436 },
+        payment: 35,
+        status: 'open',
+        category: 'photography'
+      },
+      {
+        id: '26',
+        title: 'Turlington sound system',
+        description: 'Help set up PA system',
+        location: { latitude: 29.6504, longitude: -82.3434 },
+        payment: 25,
+        status: 'open',
+        category: 'tech'
+      },
+
+      // NEW: Century Tower Area (4 tasks)
+      {
+        id: '27',
+        title: 'Century Tower bell ringer',
+        description: 'Help with tower maintenance',
+        location: { latitude: 29.6515, longitude: -82.3430 },
+        payment: 40,
+        status: 'open',
+        category: 'maintenance'
+      },
+      {
+        id: '28',
+        title: 'Century Tower tour guide',
+        description: 'Give tours of the tower',
+        location: { latitude: 29.6518, longitude: -82.3432 },
+        payment: 30,
+        status: 'open',
+        category: 'tour'
+      },
+      {
+        id: '29',
+        title: 'Century Tower photography',
+        description: 'Take architectural photos',
+        location: { latitude: 29.6516, longitude: -82.3431 },
+        payment: 25,
+        status: 'open',
+        category: 'photography'
+      },
+      {
+        id: '30',
+        title: 'Century Tower history research',
+        description: 'Help research tower history',
+        location: { latitude: 29.6517, longitude: -82.3433 },
+        payment: 20,
+        status: 'open',
+        category: 'research'
+      },
+
+      // NEW: Plaza of the Americas (6 tasks)
+      {
+        id: '31',
+        title: 'Plaza event coordinator',
+        description: 'Help coordinate outdoor event',
+        location: { latitude: 29.6495, longitude: -82.3440 },
+        payment: 45,
+        status: 'open',
+        category: 'coordination'
+      },
+      {
+        id: '32',
+        title: 'Plaza gardening help',
+        description: 'Help maintain plaza gardens',
+        location: { latitude: 29.6498, longitude: -82.3442 },
+        payment: 18,
+        status: 'open',
+        category: 'gardening'
+      },
+      {
+        id: '33',
+        title: 'Plaza art installation',
+        description: 'Help with temporary art display',
+        location: { latitude: 29.6496, longitude: -82.3441 },
+        payment: 35,
+        status: 'open',
+        category: 'art'
+      },
+      {
+        id: '34',
+        title: 'Plaza meditation guide',
+        description: 'Lead meditation session',
+        location: { latitude: 29.6497, longitude: -82.3443 },
+        payment: 30,
+        status: 'open',
+        category: 'wellness'
+      },
+      {
+        id: '35',
+        title: 'Plaza chess tournament',
+        description: 'Help organize chess event',
+        location: { latitude: 29.6494, longitude: -82.3439 },
+        payment: 25,
+        status: 'open',
+        category: 'event'
+      },
+      {
+        id: '36',
+        title: 'Plaza cleanup crew',
+        description: 'Help clean plaza area',
+        location: { latitude: 29.6499, longitude: -82.3444 },
+        payment: 15,
+        status: 'open',
+        category: 'cleaning'
+      },
+
+      // NEW: Library West Area (5 tasks)
+      {
+        id: '37',
+        title: 'Library West study group',
+        description: 'Form study group for humanities',
+        location: { latitude: 29.6512, longitude: -82.3425 },
+        payment: 0,
+        status: 'open',
+        category: 'academic'
+      },
+      {
+        id: '38',
+        title: 'Library West book sorting',
+        description: 'Help sort returned books',
+        location: { latitude: 29.6514, longitude: -82.3427 },
+        payment: 20,
+        status: 'open',
+        category: 'library'
+      },
+      {
+        id: '39',
+        title: 'Library West research help',
+        description: 'Help with research project',
+        location: { latitude: 29.6511, longitude: -82.3426 },
+        payment: 30,
+        status: 'open',
+        category: 'research'
+      },
+      {
+        id: '40',
+        title: 'Library West event setup',
+        description: 'Help set up library event',
+        location: { latitude: 29.6513, longitude: -82.3428 },
+        payment: 25,
+        status: 'open',
+        category: 'event'
+      },
+      {
+        id: '41',
+        title: 'Library West tech support',
+        description: 'Help with computer issues',
+        location: { latitude: 29.6510, longitude: -82.3424 },
+        payment: 35,
+        status: 'open',
+        category: 'tech'
+      },
+
+      // NEW: Student Rec Center Area (4 tasks)
+      {
+        id: '42',
+        title: 'Rec center workout buddy',
+        description: 'Find workout partner',
+        location: { latitude: 29.6502, longitude: -82.3468 },
+        payment: 0,
+        status: 'open',
+        category: 'fitness'
+      },
+      {
+        id: '43',
+        title: 'Rec center equipment help',
+        description: 'Help with exercise equipment',
+        location: { latitude: 29.6505, longitude: -82.3470 },
+        payment: 15,
+        status: 'open',
+        category: 'fitness'
+      },
+      {
+        id: '44',
+        title: 'Rec center class assistant',
+        description: 'Help with fitness class',
+        location: { latitude: 29.6503, longitude: -82.3469 },
+        payment: 20,
+        status: 'open',
+        category: 'fitness'
+      },
+      {
+        id: '45',
+        title: 'Rec center locker room help',
+        description: 'Help find lost items',
+        location: { latitude: 29.6504, longitude: -82.3471 },
+        payment: 10,
+        status: 'open',
+        category: 'help'
+      },
+
+      // NEW: Southwest Campus Area (3 tasks)
+      {
+        id: '46',
+        title: 'Southwest dorm help',
+        description: 'Help with dorm move-in',
+        location: { latitude: 29.6450, longitude: -82.3490 },
+        payment: 30,
+        status: 'open',
+        category: 'moving'
+      },
+      {
+        id: '47',
+        title: 'Southwest parking help',
+        description: 'Help find parking spot',
+        location: { latitude: 29.6452, longitude: -82.3492 },
+        payment: 15,
+        status: 'open',
+        category: 'parking'
+      },
+      {
+        id: '48',
+        title: 'Southwest campus tour',
+        description: 'Give tour of southwest area',
+        location: { latitude: 29.6451, longitude: -82.3491 },
+        payment: 25,
+        status: 'open',
+        category: 'tour'
+      },
+
+      // NEW: Northeast Campus Area (3 tasks)
+      {
+        id: '49',
+        title: 'Northeast lab assistant',
+        description: 'Help in science lab',
+        location: { latitude: 29.6530, longitude: -82.3450 },
+        payment: 40,
+        status: 'open',
+        category: 'lab'
+      },
+      {
+        id: '50',
+        title: 'Northeast research help',
+        description: 'Help with field research',
+        location: { latitude: 29.6532, longitude: -82.3452 },
+        payment: 35,
+        status: 'open',
+        category: 'research'
+      },
+      {
+        id: '51',
+        title: 'Northeast equipment move',
+        description: 'Help move lab equipment',
+        location: { latitude: 29.6531, longitude: -82.3451 },
+        payment: 45,
+        status: 'open',
+        category: 'moving'
       }
     ];
     setTasks(mockTasks);
+  };
+
+  // Add this function before calculateHotspots
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in km
   };
 
   // Function to calculate hotspots based on actual task data
   const calculateHotspots = (taskData: Task[]) => {
     if (taskData.length === 0) return [];
 
-    console.log('Calculating hotspots for', taskData.length, 'tasks');
+    console.log('🔥 Calculating hotspots for', taskData.length, 'tasks');
     
-    // Grid size for 1km clustering (roughly 0.01 degrees = 1km)
-    const gridSize = 0.02;
-    const minTasksForHotspot = 3;
-
-    // Group tasks by grid cells
-    const gridMap = new Map<string, Task[]>();
+    const minTasksForHotspot = 4; // Increased from 3 to 4
+    const hotspotRadiusKm = 0.2; // 200 meters
+    const minIntensityThreshold = 0.5; // Only show hotspots with 40%+ intensity
     
-    taskData.forEach(task => {
-      const gridX = Math.floor(task.location.latitude / gridSize);
-      const gridY = Math.floor(task.location.longitude / gridSize);
-      const gridKey = `${gridX},${gridY}`;
-      
-      console.log(`Task ${task.id} at (${task.location.latitude}, ${task.location.longitude}) goes to grid ${gridKey}`);
-      
-      if (!gridMap.has(gridKey)) {
-        gridMap.set(gridKey, []);
-      }
-      gridMap.get(gridKey)!.push(task);
-    });
-
-    console.log('Grid clusters:', Array.from(gridMap.entries()));
-
-    // Convert grid clusters to hotspots
     const hotspots: Hotspot[] = [];
+    const usedTasks = new Set<string>();
     
-    gridMap.forEach((tasks, gridKey) => {
-      console.log(`Grid ${gridKey} has ${tasks.length} tasks`);
-      if (tasks.length >= minTasksForHotspot) {
-        // Calculate center of the cluster
-        const centerLat = tasks.reduce((sum, t) => sum + t.location.latitude, 0) / tasks.length;
-        const centerLng = tasks.reduce((sum, t) => sum + t.location.longitude, 0) / tasks.length;
-        
-        // Calculate radius based on task spread
-        const maxDistance = Math.max(
-          ...tasks.map(t => 
-            Math.sqrt(
-              Math.pow(t.location.latitude - centerLat, 2) + 
-              Math.pow(t.location.longitude - centerLng, 2)
-            )
-          )
+    // Sort tasks by density (tasks with more neighbors first)
+    const taskDensities = taskData.map((task, index) => {
+      const nearbyCount = taskData.filter((otherTask, otherIndex) => {
+        if (index === otherIndex) return false;
+        const distance = calculateDistance(
+          task.location.latitude, task.location.longitude,
+          otherTask.location.latitude, otherTask.location.longitude
         );
+        return distance <= hotspotRadiusKm;
+      }).length;
+      return { task, nearbyCount, index };
+    }).sort((a, b) => b.nearbyCount - a.nearbyCount);
+    
+    // Create hotspots starting with highest density areas
+    taskDensities.forEach(({ task, nearbyCount, index }) => {
+      if (usedTasks.has(task.id)) return;
+      
+      if (nearbyCount >= minTasksForHotspot - 1) {
+        const nearbyUnusedTasks = taskData.filter((otherTask, otherIndex) => {
+          if (index === otherIndex) return false;
+          if (usedTasks.has(otherTask.id)) return false;
+          
+          const distance = calculateDistance(
+            task.location.latitude, task.location.longitude,
+            otherTask.location.latitude, otherTask.location.longitude
+          );
+          return distance <= hotspotRadiusKm;
+        });
         
-        // Intensity based on task density (0-1 scale)
-        const intensity = Math.min(tasks.length / 10, 1);
-        
-        const hotspot = {
-          center: { latitude: centerLat, longitude: centerLng },
-          radius: Math.max(maxDistance * 50000, 100),
-          taskCount: tasks.length,
-          intensity: intensity
-        };
-        
-        console.log('Created hotspot:', hotspot);
-        hotspots.push(hotspot);
+        if (nearbyUnusedTasks.length >= minTasksForHotspot - 1) {
+          const allTasksInHotspot = [task, ...nearbyUnusedTasks];
+          const centerLat = allTasksInHotspot.reduce((sum, t) => sum + t.location.latitude, 0) / allTasksInHotspot.length;
+          const centerLng = allTasksInHotspot.reduce((sum, t) => sum + t.location.longitude, 0) / allTasksInHotspot.length;
+          
+          // Mark all these tasks as used
+          allTasksInHotspot.forEach(t => usedTasks.add(t.id));
+          
+          const intensity = Math.min(allTasksInHotspot.length / 10, 1);
+          
+          // Only create hotspot if it meets intensity threshold
+          if (intensity >= minIntensityThreshold) {
+            const hotspot = {
+              center: { latitude: centerLat, longitude: centerLng },
+              radius: hotspotRadiusKm * 1000,
+              taskCount: allTasksInHotspot.length,
+              intensity
+            };
+            
+            console.log('🔥 Created hotspot:', hotspot);
+            hotspots.push(hotspot);
+          } else {
+            console.log('🚫 Skipped weak hotspot with intensity:', intensity);
+          }
+        }
       }
     });
-
-    console.log('Final hotspots:', hotspots);
+    
+    console.log('🔥 Final hotspots:', hotspots);
     return hotspots;
   };
 

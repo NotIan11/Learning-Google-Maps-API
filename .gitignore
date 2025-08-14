@@ -71,4 +71,7 @@ Desktop.ini
 build/
 out/
 
+# API File
+config/api.ts
+
 # Expo specific
