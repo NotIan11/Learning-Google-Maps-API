@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import React, { useState } from 'react';
-import { Alert, Dimensions, Linking, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
 
 // Types for future integration
@@ -15,6 +15,18 @@ interface Task {
   payment: number;
   status: 'open' | 'accepted' | 'completed';
   category?: string;
+  // Add delivery-specific fields
+  isDelivery?: boolean;
+  pickupLocation?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  dropoffLocation?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
 }
 
 interface Hotspot {
@@ -78,17 +90,43 @@ export default function App() {
   };
 
   // Add this function to open Apple Maps navigation
-  const openAppleMapsNavigation = (taskLocation: { latitude: number; longitude: number }) => {
+  const openAppleMapsNavigation = (task: Task) => {
     if (!userLocation) {
       Alert.alert('No Location', 'Please enable location services or set mock location');
       return;
     }
 
-    // Create the Apple Maps URL
-    const url = `http://maps.apple.com/?saddr=${userLocation.latitude},${userLocation.longitude}&daddr=${taskLocation.latitude},${taskLocation.longitude}&dirflg=w`;
-    
-    // Open Apple Maps
-    Linking.openURL(url);
+    if (task.isDelivery && task.pickupLocation && task.dropoffLocation) {
+      // For delivery tasks, create a multi-stop route
+      // Apple Maps supports multiple destinations with this format
+      const pickupCoords = `${task.pickupLocation.latitude},${task.pickupLocation.longitude}`;
+      const dropoffCoords = `${task.dropoffLocation.latitude},${task.dropoffLocation.longitude}`;
+      
+      // Try the correct Apple Maps multi-stop format
+      // Format: maps://?saddr=start&daddr=stop1&daddr=stop2
+      const url = `maps://?saddr=${userLocation.latitude},${userLocation.longitude}&daddr=${pickupCoords}&daddr=${dropoffCoords}`;
+      
+      console.log('Opening Apple Maps with multi-stop URL:', url);
+      
+      // Try to open the URL
+      Linking.openURL(url).catch(err => {
+        console.error('Failed to open multi-stop route:', err);
+        // Fallback: open route to pickup location
+        const fallbackUrl = `maps://?saddr=${userLocation.latitude},${userLocation.longitude}&daddr=${pickupCoords}`;
+        Linking.openURL(fallbackUrl);
+        
+        Alert.alert(
+          'Multi-stop Route Unavailable',
+          'Opening route to pickup location. You can manually add the dropoff location in Apple Maps by tapping the route and adding a stop.',
+          [{ text: 'OK' }]
+        );
+      });
+    } else {
+      // For regular tasks, use single destination
+      const url = `maps://?saddr=${userLocation.latitude},${userLocation.longitude}&daddr=${task.location.latitude},${task.location.longitude}`;
+      console.log('Opening Apple Maps with single destination URL:', url);
+      Linking.openURL(url);
+    }
   };
 
   // Function to accept a task
@@ -103,7 +141,7 @@ export default function App() {
     setAcceptedTasks(prev => new Set(prev).add(task.id));
     
     // Open Apple Maps navigation instead of calculating route
-    openAppleMapsNavigation(task.location);
+    openAppleMapsNavigation(task);
     
     setSelectedTask(null);
   };
@@ -177,14 +215,26 @@ export default function App() {
         status: 'open',
         category: 'parking'
       },
+      // Updated delivery task with pickup and dropoff locations
       {
         id: '6',
         title: 'Food delivery to stadium',
-        description: 'Bring pizza to section 15',
-        location: { latitude: 29.6492, longitude: -82.3482 },
+        description: 'Pick up pizza from Pizza Palace and deliver to section 15 at the stadium',
+        location: { latitude: 29.6492, longitude: -82.3482 }, // Dropoff location (stadium)
         payment: 18,
         status: 'open',
-        category: 'delivery'
+        category: 'delivery',
+        isDelivery: true,
+        pickupLocation: {
+          latitude: 29.6460, // Pizza Palace location
+          longitude: -82.3450,
+          address: 'Pizza Palace, University Ave'
+        },
+        dropoffLocation: {
+          latitude: 29.6492, // Stadium section 15
+          longitude: -82.3482,
+          address: 'Ben Hill Griffin Stadium, Section 15'
+        }
       },
       {
         id: '7',
@@ -610,6 +660,88 @@ export default function App() {
         payment: 45,
         status: 'open',
         category: 'moving'
+      },
+
+      // NEW: Additional delivery tasks for testing
+      {
+        id: '52',
+        title: 'Package delivery from library',
+        description: 'Pick up package from Marston Library and deliver to my dorm in Southwest',
+        location: { latitude: 29.6450, longitude: -82.3490 }, // Dropoff location (dorm)
+        payment: 25,
+        status: 'open',
+        category: 'delivery',
+        isDelivery: true,
+        pickupLocation: {
+          latitude: 29.6485, // Marston Library
+          longitude: -82.3460,
+          address: 'Marston Science Library'
+        },
+        dropoffLocation: {
+          latitude: 29.6420, // Southwest dorm - moved further away
+          longitude: -82.3510, // moved further away
+          address: 'Southwest Dorm Complex'
+        }
+      },
+      {
+        id: '53',
+        title: 'Coffee delivery to class',
+        description: 'Pick up coffee from Starbucks and bring to my class in Turlington',
+        location: { latitude: 29.6505, longitude: -82.3435 }, // Dropoff location (class)
+        payment: 12,
+        status: 'open',
+        category: 'delivery',
+        isDelivery: true,
+        pickupLocation: {
+          latitude: 29.6470, // Starbucks location
+          longitude: -82.3460,
+          address: 'Starbucks, Reitz Union'
+        },
+        dropoffLocation: {
+          latitude: 29.6505, // Turlington class
+          longitude: -82.3435,
+          address: 'Turlington Hall, Room 101'
+        }
+      },
+      {
+        id: '54',
+        title: 'Book delivery from bookstore',
+        description: 'Pick up textbooks from UF Bookstore and deliver to Century Tower area',
+        location: { latitude: 29.6515, longitude: -82.3430 }, // Dropoff location
+        payment: 20,
+        status: 'open',
+        category: 'delivery',
+        isDelivery: true,
+        pickupLocation: {
+          latitude: 29.6475, // UF Bookstore
+          longitude: -82.3470,
+          address: 'UF Bookstore, Reitz Union'
+        },
+        dropoffLocation: {
+          latitude: 29.6515, // Century Tower area
+          longitude: -82.3430,
+          address: 'Century Tower'
+        }
+      },
+      {
+        id: '55',
+        title: 'Lunch delivery to lab',
+        description: 'Pick up lunch from Subway and deliver to my lab in Northeast campus',
+        location: { latitude: 29.6530, longitude: -82.3450 }, // Dropoff location (lab)
+        payment: 15,
+        status: 'open',
+        category: 'delivery',
+        isDelivery: true,
+        pickupLocation: {
+          latitude: 29.6480, // Subway location
+          longitude: -82.3470,
+          address: 'Subway, Reitz Union Food Court'
+        },
+        dropoffLocation: {
+          latitude: 29.6530, // Northeast lab
+          longitude: -82.3450,
+          address: 'Northeast Campus Lab Building'
+        }
       }
     ];
     setTasks(mockTasks);
@@ -892,7 +1024,7 @@ export default function App() {
           <Marker
             key={task.id}
             coordinate={task.location}
-            pinColor="#FF6B35" // UF Orange
+            pinColor="#FF6B35" // UF Orange for all tasks
             onPress={() => setSelectedTask(task)}
           />
         ))}
@@ -957,97 +1089,127 @@ export default function App() {
               </Text>
             </View>
 
-            {/* Task Creator Info */}
-            <View style={styles.creatorSection}>
-              <View style={styles.creatorIcon}>
-                <Text style={styles.creatorIconText}>👤</Text>
+            {/* Scrollable Content */}
+            <ScrollView 
+              style={styles.modalScrollContent} 
+              contentContainerStyle={styles.modalScrollContentContainer}
+              showsVerticalScrollIndicator={true}
+              bounces={false}
+            >
+              {/* Task Creator Info */}
+              <View style={styles.creatorSection}>
+                <View style={styles.creatorIcon}>
+                  <Text style={styles.creatorIconText}>👤</Text>
+                </View>
+                <View style={styles.creatorInfo}>
+                  <Text style={styles.creatorLabel}>Task Creator</Text>
+                  <Text style={styles.postedDate}>Posted {new Date().toLocaleDateString()}</Text>
+                </View>
               </View>
-              <View style={styles.creatorInfo}>
-                <Text style={styles.creatorLabel}>Task Creator</Text>
-                <Text style={styles.postedDate}>Posted {new Date().toLocaleDateString()}</Text>
-              </View>
-            </View>
 
-            {/* Task Title and Tag */}
-            <Text style={styles.taskTitle}>{selectedTask.title}</Text>
-            <View style={styles.taskTag}>
-              <Text style={styles.tagText}>{selectedTask.category || 'general'}</Text>
-            </View>
+              {/* Task Title and Tag */}
+              <Text style={styles.taskTitle}>{selectedTask.title}</Text>
+              <View style={styles.taskTag}>
+                <Text style={styles.tagText}>{selectedTask.category || 'general'}</Text>
+              </View>
 
-            {/* Description */}
-            <Text style={styles.descriptionLabel}>Description</Text>
-            <Text style={styles.descriptionText}>{selectedTask.description}</Text>
+              {/* Description */}
+              <Text style={styles.descriptionLabel}>Description</Text>
+              <Text style={styles.descriptionText}>{selectedTask.description}</Text>
 
-            {/* Details Grid */}
-            <View style={styles.detailsGrid}>
-              <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>📍</Text>
-                <Text style={styles.detailText}>UF Campus Area</Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>⏱️</Text>
-                <Text style={styles.detailText}>15-20 min</Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>💰</Text>
-                <Text style={styles.detailText}>${selectedTask.payment}</Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>✅</Text>
-                <Text style={styles.detailText}>Verified User</Text>
-              </View>
-            </View>
-
-            {/* Safety Tips */}
-            <View style={styles.safetySection}>
-              <View style={styles.safetyHeader}>
-                <Text style={styles.safetyIcon}>⚠️</Text>
-                <Text style={styles.safetyTitle}>Safety Tips</Text>
-              </View>
-              <View style={styles.safetyTips}>
-                <Text style={styles.safetyTip}>• Meet in a public place</Text>
-                <Text style={styles.safetyTip}>• Share task details with a friend</Text>
-                <Text style={styles.safetyTip}>• Use in-app chat for communication</Text>
-                <Text style={styles.safetyTip}>• Report suspicious behavior</Text>
-              </View>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.actionButtons}>
-              {acceptedTasks.has(selectedTask.id) ? (
-                <TouchableOpacity 
-                  style={[styles.acceptButton, styles.cancelButton]}
-                  onPress={() => cancelTask(selectedTask)}
-                >
-                  <Text style={styles.cancelIcon}>✕</Text>
-                  <Text style={styles.cancelText}>Cancel Task</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity 
-                  style={[
-                    styles.acceptButton, 
-                    styles.fullWidthButton,
-                    acceptedTasks.size > 0 && styles.disabledButton
-                  ]}
-                  onPress={() => {
-                    console.log('🔘 Accept button pressed!');
-                    acceptTask(selectedTask);
-                  }}
-                  disabled={acceptedTasks.size > 0}
-                >
-                  <Text style={styles.acceptIcon}>✓</Text>
-                  <Text style={styles.acceptText}>
-                    {acceptedTasks.size > 0 ? 'Another Task Accepted' : 'Accept Task'}
-                  </Text>
-                </TouchableOpacity>
+              {/* Delivery Route Information for Delivery Tasks */}
+              {selectedTask.isDelivery && selectedTask.pickupLocation && selectedTask.dropoffLocation && (
+                <View style={styles.routeInfo}>
+                  <Text style={styles.routeTitle}>🚚 Delivery Route</Text>
+                  <View style={styles.routeDetails}>
+                    <Text style={styles.routeDetail}>
+                      📍 <Text style={styles.routeLabel}>Pickup:</Text> {selectedTask.pickupLocation.address || `${selectedTask.pickupLocation.latitude.toFixed(4)}, ${selectedTask.pickupLocation.longitude.toFixed(4)}`}
+                    </Text>
+                    <Text style={styles.routeDetail}>
+                      🎯 <Text style={styles.routeLabel}>Dropoff:</Text> {selectedTask.dropoffLocation.address || `${selectedTask.dropoffLocation.latitude.toFixed(4)}, ${selectedTask.dropoffLocation.longitude.toFixed(4)}`}
+                    </Text>
+                    <Text style={styles.routeNote}>
+                      💡 Navigation will show a two-stop route: your location → pickup → dropoff
+                    </Text>
+                  </View>
+                </View>
               )}
-            </View>
 
-            {/* Report Link */}
-            <View style={styles.reportSection}>
-              <Text style={styles.reportIcon}>🚨</Text>
-              <Text style={styles.reportText}>Report Task</Text>
-            </View>
+              {/* Details Grid */}
+              <View style={styles.detailsGrid}>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailIcon}>📍</Text>
+                  <Text style={styles.detailText}>
+                    {selectedTask.isDelivery ? 'Delivery Route' : 'UF Campus Area'}
+                  </Text>
+                </View>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailIcon}>⏱️</Text>
+                  <Text style={styles.detailText}>
+                    {selectedTask.isDelivery ? '25-35 min' : '15-20 min'}
+                  </Text>
+                </View>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailIcon}>💰</Text>
+                  <Text style={styles.detailText}>${selectedTask.payment}</Text>
+                </View>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailIcon}>✅</Text>
+                  <Text style={styles.detailText}>Verified User</Text>
+                </View>
+              </View>
+
+              {/* Safety Tips */}
+              <View style={styles.safetySection}>
+                <View style={styles.safetyHeader}>
+                  <Text style={styles.safetyIcon}>⚠️</Text>
+                  <Text style={styles.safetyTitle}>Safety Tips</Text>
+                </View>
+                <View style={styles.safetyTips}>
+                  <Text style={styles.safetyTip}>• Meet in a public place</Text>
+                  <Text style={styles.safetyTip}>• Share task details with a friend</Text>
+                  <Text style={styles.safetyTip}>• Use in-app chat for communication</Text>
+                  <Text style={styles.safetyTip}>• Report suspicious behavior</Text>
+                </View>
+              </View>
+
+              {/* Action Buttons */}
+              <View style={styles.actionButtons}>
+                {acceptedTasks.has(selectedTask.id) ? (
+                  <TouchableOpacity 
+                    style={[styles.acceptButton, styles.cancelButton]}
+                    onPress={() => cancelTask(selectedTask)}
+                  >
+                    <Text style={styles.cancelIcon}>✕</Text>
+                    <Text style={styles.cancelText}>Cancel Task</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity 
+                    style={[
+                      styles.acceptButton, 
+                      styles.fullWidthButton,
+                      acceptedTasks.size > 0 && styles.disabledButton
+                    ]}
+                    onPress={() => {
+                      console.log('🔘 Accept button pressed!');
+                      acceptTask(selectedTask);
+                    }}
+                    disabled={acceptedTasks.size > 0}
+                  >
+                    <Text style={styles.acceptIcon}>✓</Text>
+                    <Text style={styles.acceptText}>
+                      {acceptedTasks.size > 0 ? 'Another Task Accepted' : 'Accept Task'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Report Link */}
+              <View style={styles.reportSection}>
+                <Text style={styles.reportIcon}>🚨</Text>
+                <Text style={styles.reportText}>Report Task</Text>
+              </View>
+            </ScrollView>
           </View>
         </View>
       )}
@@ -1190,7 +1352,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     margin: 20,
-    maxHeight: '80%',
+    height: '85%', // Fixed height instead of maxHeight
     width: '90%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -1220,6 +1382,12 @@ const styles = StyleSheet.create({
   modalContent: {
     flex: 1,
     paddingBottom: 20,
+  },
+  modalScrollContent: {
+    flex: 1, // This makes it take up the remaining space after the header
+  },
+  modalScrollContentContainer: {
+    paddingBottom: 20, // Add padding at the bottom of the scrollable content
   },
   creatorSection: {
     flexDirection: 'row',
@@ -1266,7 +1434,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 15,
     alignSelf: 'flex-start',
-    marginHorizontal: 20,
+    marginHorizontal: 20, // This aligns with the text above
     marginBottom: 15,
   },
   tagText: {
@@ -1430,9 +1598,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   routeDetails: {
+    gap: 8,
+  },
+  routeDetail: {
     fontSize: 14,
     color: '#000',
-    marginBottom: 5,
+    lineHeight: 20,
+  },
+  routeLabel: {
+    fontWeight: '600',
+    color: '#333',
+  },
+  routeNote: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
   },
   clearRouteButton: {
     backgroundColor: '#FF3B30',
